@@ -49,6 +49,8 @@ export default function CheckoutModal({ open, onClose }: CheckoutModalProps) {
           txHash: hash,
           merchant: merchantAddress,
           amount: 0.01,
+          plan_id: '4862ed5f-eca5-46fe-af4e-dceb575b6ff5',
+          create_subscription: true,
         }),
       })
 
@@ -59,6 +61,9 @@ export default function CheckoutModal({ open, onClose }: CheckoutModalProps) {
       }
 
       console.log('Payment verified successfully:', data)
+      if (data.subscription) {
+        console.log('Subscription created:', data.subscription)
+      }
       setIsVerified(true)
     } catch (err: any) {
       console.error('Verification error:', err)
@@ -87,7 +92,7 @@ export default function CheckoutModal({ open, onClose }: CheckoutModalProps) {
         abi: paymentsAbi,
         functionName: 'pay',
         args: [merchantAddress],
-        value: parseEther('0.01'),
+        value: parseEther('0.001'),
       })
       console.log('Transaction initiated')
     } catch (err) {
@@ -111,7 +116,7 @@ export default function CheckoutModal({ open, onClose }: CheckoutModalProps) {
         </div>
 
         <div className="mb-6">
-          <p className="text-3xl font-bold text-gray-900 mb-2">0.01 AVAX</p>
+          <p className="text-3xl font-bold text-gray-900 mb-2">0.001 AVAX</p>
           <p className="text-gray-600">Premium Subscription</p>
         </div>
 
@@ -155,7 +160,7 @@ export default function CheckoutModal({ open, onClose }: CheckoutModalProps) {
               disabled={isPending || isConfirming}
               className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              {isWrongNetwork ? 'Switch to Fuji Network' : isPending ? 'Confirm in Wallet...' : isConfirming ? 'Processing...' : 'Pay 0.01 AVAX'}
+              {isWrongNetwork ? 'Switch to Fuji Network' : isPending ? 'Confirm in Wallet...' : isConfirming ? 'Processing...' : 'Pay 0.001 AVAX'}
             </button>
 
             {error && (
@@ -180,7 +185,7 @@ export default function CheckoutModal({ open, onClose }: CheckoutModalProps) {
 
                 {isVerified && (
                   <div className="p-3 bg-green-50 border border-green-300 rounded-lg">
-                    <p className="text-green-800 font-semibold text-sm">✓ Payment Verified & Recorded</p>
+                    <p className="text-green-800 font-semibold text-sm">✓ Payment Verified & Subscription Created!</p>
                   </div>
                 )}
 

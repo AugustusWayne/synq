@@ -18,6 +18,7 @@ export type Merchant = {
   id: string
   wallet: string
   api_key: string
+  webhook_url?: string
   created_at: string
 }
 
@@ -30,5 +31,27 @@ export type Payment = {
   timestamp: string
   status: 'pending' | 'verified' | 'failed'
   created_at: string
+}
+
+export type Plan = {
+  id: string
+  merchant_id: string
+  name: string
+  amount: string
+  interval: 'weekly' | 'monthly' | 'yearly'
+  created_at: string
+}
+
+export type Subscription = {
+  id: string
+  merchant_id: string
+  customer: string
+  payer_wallet: string
+  plan_id: string
+  status: 'active' | 'canceled' | 'expired' | 'payment_required'
+  current_period_end: number
+  last_payment_tx?: string
+  created_at: string
+  updated_at: string
 }
 

@@ -22,5 +22,5 @@ export const paymentsAbi: Abi = [
   }
 ];
 
-export const merchantAddress = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e" as const;
+export const merchantAddress = "0xCb5452F2123c67738084CA49D34dC249c5c3B599" as const;
 

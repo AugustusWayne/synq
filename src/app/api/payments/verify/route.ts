@@ -4,6 +4,7 @@ import { avalancheFuji } from 'viem/chains'
 import { paymentsAbi, paymentsAddress } from '@/lib/contract'
 import { ensureSupabase } from '@/lib/db'
 import { triggerWebhook } from '@/lib/webhooks'
+import { createSubscription } from '@/lib/subscriptions'
 
 const publicClient = createPublicClient({
   chain: avalancheFuji,
@@ -15,7 +16,7 @@ export async function POST(req: NextRequest) {
     const supabase = ensureSupabase()
     
     const body = await req.json()
-    const { txHash, merchant, amount } = body
+    const { txHash, merchant, amount, plan_id, create_subscription } = body
 
     if (!txHash || !merchant || !amount) {
       return NextResponse.json(
@@ -24,7 +25,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    console.log('Verifying payment:', { txHash, merchant, amount })
+    console.log('Verifying payment:', { txHash, merchant, amount, plan_id, create_subscription })
 
     const transaction = await publicClient.getTransactionReceipt({
       hash: txHash as `0x${string}`,
@@ -136,6 +137,7 @@ export async function POST(req: NextRequest) {
     console.log('Payment verified + saved:', paymentRecord)
 
     await triggerWebhook('payment_succeeded', {
+      merchant_id: merchantId,
       payment_id: paymentRecord.id,
       merchant: eventData.merchant,
       payer: eventData.payer,
@@ -144,6 +146,34 @@ export async function POST(req: NextRequest) {
       timestamp: eventData.timestamp.toString(),
     })
 
+    let subscriptionData = null
+
+    if ((create_subscription || plan_id) && plan_id) {
+      console.log('Creating subscription for payment...')
+      try {
+        subscriptionData = await createSubscription({
+          merchantId,
+          customer: eventData.payer,
+          wallet: eventData.payer,
+          planId: plan_id,
+          txHash: txHash,
+        })
+
+        await triggerWebhook('subscription_created', {
+          merchant_id: merchantId,
+          subscription_id: subscriptionData.id,
+          customer: eventData.payer,
+          plan_id: plan_id,
+          status: subscriptionData.status,
+          current_period_end: subscriptionData.current_period_end,
+        })
+
+        console.log('Subscription created:', subscriptionData.id)
+      } catch (subError: any) {
+        console.error('Failed to create subscription:', subError)
+      }
+    }
+
     return NextResponse.json({
       verified: true,
       payer: eventData.payer,
@@ -151,6 +181,11 @@ export async function POST(req: NextRequest) {
       amount: eventData.amount.toString(),
       timestamp: eventData.timestamp.toString(),
       payment_id: paymentRecord.id,
+      subscription: subscriptionData ? {
+        subscription_id: subscriptionData.id,
+        status: subscriptionData.status,
+        current_period_end: subscriptionData.current_period_end,
+      } : undefined,
     })
   } catch (error: any) {
     console.error('Error verifying payment:', error)

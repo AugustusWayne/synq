@@ -12,7 +12,7 @@ export default function AvaxCheckout() {
         onClick={() => setModalOpen(true)}
         className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-semibold text-lg"
       >
-        Subscribe for 0.01 AVAX
+        Subscribe for 0.001 AVAX
       </button>
 
       <CheckoutModal
