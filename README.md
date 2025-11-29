@@ -1,161 +1,363 @@
-# Avalanche x402 Commerce Engine
+# 🏔️ Avalanche x402 Commerce Engine
 
-Full-stack payment infrastructure on Avalanche Fuji testnet.
+**Full-stack Web3 payment and subscription platform powered by Avalanche, with AI automation.**
 
-## 🚀 Features
+[![Avalanche](https://img.shields.io/badge/Avalanche-Fuji-E84142)](https://testnet.snowtrace.io)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org)
+[![Solidity](https://img.shields.io/badge/Solidity-0.8.20-gray)](https://soliditylang.org)
 
-- ✅ Smart contract payments (Solidity + Foundry)
-- ✅ Next.js frontend with Wagmi wallet integration
-- ✅ Backend payment verification via viem
-- ✅ Supabase database for merchant/payment records
-- ✅ Webhook system for merchant notifications
-- ✅ Real-time event listening
+---
 
-## 📁 Project Structure
+## ✨ Features
 
-```
-/contract              # Foundry smart contracts
-  /src                 # Solidity contracts
-  /script              # Deployment scripts
-  /test                # Contract tests
-  
-/src
-  /app
-    /api
-      /payments/verify # Payment verification endpoint
-      /webhooks        # Webhook receiver
-    /checkout-demo     # Demo checkout page
-  /components          # React components
-  /lib
-    contract.ts        # Contract ABI & address
-    db.ts             # Supabase client
-    webhooks.ts       # Webhook triggers
-    wagmiClient.ts    # Wallet config
-```
+### **Core Infrastructure**
+- ✅ **Smart Contracts** - Solidity payment contracts (Foundry)
+- ✅ **Payment Processing** - Wagmi + Viem blockchain integration
+- ✅ **Subscription Management** - Recurring billing, auto-renewal
+- ✅ **Access Control** - Content gating & verification
+- ✅ **Database** - Supabase PostgreSQL
+- ✅ **Webhooks** - Real-time merchant notifications
 
-## 🛠️ Setup
+### **AI Automation** 🤖
+- ✅ **Invoice Generation** - Gemini 2.0 Flash AI
+- ✅ **Renewal Management** - Automated subscription renewals
+- ✅ **Analytics Insights** - AI-powered business intelligence
 
-### 1. Install Dependencies
+### **Developer SDK** 📦
+- ✅ **React Components** - Pre-built checkout & status UI
+- ✅ **TypeScript SDK** - Full-featured API client
+- ✅ **Type Definitions** - Complete type safety
+
+---
+
+## 🚀 Quick Start
+
+### **Prerequisites**
+- Node.js 18+
+- MetaMask wallet
+- Avalanche Fuji testnet AVAX ([Get from faucet](https://faucet.avax.network/))
+
+### **1. Install Dependencies**
 ```bash
 npm install
 ```
 
-### 2. Set up Supabase
-1. Create project at https://app.supabase.com
-2. Run migration from `supabase/migrations/001_initial_schema.sql`
-3. Get API credentials from Settings → API
-
-### 3. Configure Environment
+### **2. Configure Environment**
 Create `.env.local`:
 ```bash
+# Supabase
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_SERVICE_KEY=your-service-role-key
+
+# AI (optional)
+GEMINI_API_KEY=your-gemini-api-key
 ```
 
-### 4. Deploy Contract (Optional)
-```bash
-cd contract
-echo "PRIVATE_KEY=your_key" > .env
-forge script script/Deploy.s.sol --rpc-url fuji --broadcast --legacy
-```
+### **3. Set up Database**
+1. Create Supabase project: https://app.supabase.com
+2. Run migrations in SQL Editor:
+   - `supabase/migrations/001_initial_schema.sql`
+   - `supabase/migrations/002_subscriptions_schema.sql`
+   - `supabase/migrations/003_add_invoice_field.sql`
 
-Update contract address in `src/lib/contract.ts`
-
-### 5. Run Development Server
+### **4. Run Development Server**
 ```bash
 npm run dev
 ```
 
-Visit http://localhost:3000/checkout-demo
+Visit: **http://localhost:3000**
+
+---
+
+## 📁 Project Structure
+
+```
+avax-402/
+├── contract/              # Smart contracts (Foundry)
+│   ├── src/
+│   │   └── Payments.sol  # Main payment contract
+│   ├── script/           # Deployment scripts
+│   └── test/             # Contract tests
+│
+├── src/
+│   ├── agents/           # AI automation layer
+│   │   ├── gemini.ts     # Gemini API wrapper
+│   │   ├── invoice.ts    # Invoice generation
+│   │   ├── renew.ts      # Subscription renewal
+│   │   └── analytics.ts  # Business insights
+│   │
+│   ├── app/
+│   │   ├── api/          # Backend API routes
+│   │   │   ├── payments/verify/
+│   │   │   ├── subscriptions/
+│   │   │   ├── access/verify/
+│   │   │   ├── agents/run/
+│   │   │   └── webhooks/
+│   │   │
+│   │   ├── checkout-demo/     # Payment demo
+│   │   ├── protected/         # Gated content
+│   │   ├── dashboard/
+│   │   │   ├── subscriptions/ # Subscription manager
+│   │   │   └── analytics/     # AI agent dashboard
+│   │   └── sdk-demo/          # SDK examples
+│   │
+│   ├── components/       # React components
+│   │   ├── AvaxCheckout.tsx
+│   │   └── CheckoutModal.tsx
+│   │
+│   └── lib/              # Core utilities
+│       ├── contract.ts   # Contract ABI & address
+│       ├── db.ts         # Supabase client
+│       ├── subscriptions.ts
+│       └── wagmiClient.ts
+│
+├── sdk/                  # Developer SDK
+│   ├── client/           # API utilities
+│   ├── ui/               # React components
+│   ├── types/            # TypeScript types
+│   └── dist/             # Compiled output
+│
+└── supabase/
+    └── migrations/       # Database schema
+```
+
+---
 
 ## 💳 Payment Flow
 
-1. **User** connects wallet (MetaMask on Fuji)
-2. **User** clicks "Pay 0.01 AVAX"
-3. **Contract** transfers AVAX to merchant, emits `PaymentReceived` event
-4. **Frontend** waits for transaction confirmation
-5. **Frontend** calls `/api/payments/verify` with tx hash
-6. **Backend** reads event from blockchain via viem
-7. **Backend** verifies event matches transaction
-8. **Backend** saves payment to Supabase
-9. **Backend** triggers webhook to merchant (if configured)
-10. **Frontend** shows "Payment Verified" ✓
+```
+1. User connects wallet (MetaMask)
+   ↓
+2. User clicks "Pay 0.01 AVAX"
+   ↓
+3. Smart contract transfers AVAX to merchant
+   ↓
+4. PaymentReceived event emitted on-chain
+   ↓
+5. Frontend waits for confirmation
+   ↓
+6. Backend verifies transaction via viem
+   ↓
+7. Payment saved to Supabase
+   ↓
+8. Subscription auto-created (if applicable)
+   ↓
+9. Webhook triggered to merchant
+   ↓
+10. Access granted ✓
+```
+
+---
 
 ## 🔌 API Endpoints
 
-### POST `/api/payments/verify`
-Verifies blockchain payment and stores record.
+### **Payments**
+- `POST /api/payments/verify` - Verify blockchain payment
 
-**Request:**
-```json
-{
-  "txHash": "0x...",
-  "merchant": "0x...",
-  "amount": 0.01
-}
-```
+### **Subscriptions**
+- `POST /api/subscriptions/create` - Create subscription
+- `GET /api/subscriptions/list` - List subscriptions
+- `POST /api/subscriptions/cancel` - Cancel subscription
+- `POST /api/subscriptions/renew` - Renew subscription
 
-**Response:**
-```json
-{
-  "verified": true,
-  "payer": "0x...",
-  "merchant": "0x...",
-  "amount": "10000000000000000",
-  "timestamp": "1234567890",
-  "payment_id": "uuid"
-}
-```
+### **Access Control**
+- `POST /api/access/verify` - Check access to gated content
 
-### POST `/api/webhooks/receive`
-Test endpoint for receiving merchant webhooks.
+### **Plans**
+- `POST /api/plans/create` - Create subscription plan
+- `GET /api/plans/list` - List plans
 
-## 📊 Database Schema
+### **AI Agents**
+- `POST /api/agents/run` - Run AI automation agents
 
-### `merchants`
-- `id` (uuid)
-- `wallet` (text)
-- `api_key` (text)
-- `webhook_url` (text)
-- `created_at` (timestamp)
+### **Webhooks**
+- `POST /api/webhooks/receive` - Receive merchant webhooks
 
-### `payments`
-- `id` (uuid)
-- `merchant_id` (uuid FK)
-- `payer` (text)
-- `amount` (numeric)
-- `tx_hash` (text)
-- `timestamp` (bigint)
-- `status` (text)
-- `created_at` (timestamp)
+---
 
-## 🧪 Testing
+## 🤖 AI Agents
+
+### **Invoice Agent**
+Automatically generates professional invoices for verified payments.
 
 ```bash
-# Test contracts
-cd contract && forge test
-
-# Build frontend
-npm run build
-
-# Run dev server
-npm run dev
+POST /api/agents/run
+{ "agent": "invoice" }
 ```
+
+### **Renewal Agent**
+Manages subscription renewals and sends notices.
+
+```bash
+POST /api/agents/run
+{ "agent": "renew" }
+```
+
+### **Analytics Agent**
+Generates AI-powered business insights.
+
+```bash
+POST /api/agents/run
+{ "agent": "analytics", "merchantId": "uuid" }
+```
+
+---
+
+## 📦 Using the SDK
+
+### **Import Components**
+```tsx
+import { CheckoutButton, SubscriptionStatus } from '../sdk'
+
+export default function MyPage() {
+  const { address } = useAccount()
+  
+  return (
+    <>
+      <CheckoutButton amount={0.01} planId="uuid" />
+      <SubscriptionStatus wallet={address} />
+    </>
+  )
+}
+```
+
+### **Use API Client**
+```tsx
+import { verifyPayment, checkAccess } from '../sdk'
+
+// Verify payment
+const result = await verifyPayment(txHash, merchant, 0.01, planId)
+
+// Check access
+const { access } = await checkAccess(wallet, merchant)
+```
+
+**Full SDK Documentation:** [SDK_USAGE.md](./SDK_USAGE.md)
+
+---
+
+## 🗄️ Database Schema
+
+### **Tables**
+- `merchants` - Merchant accounts with API keys
+- `payments` - Payment transaction records
+- `plans` - Subscription plan definitions
+- `subscriptions` - Active/canceled subscriptions
+
+**Schema files:** `supabase/migrations/`
+
+---
 
 ## 🌐 Deployed Contract
 
-**Fuji Testnet:**
-- Contract: `0xA97Cb465cf77b1f31a9b554491451cc94871E0A1`
-- Explorer: https://testnet.snowtrace.io/address/0xA97Cb465cf77b1f31a9b554491451cc94871E0A1
+**Avalanche Fuji Testnet:**
+- **Address:** `0xA97Cb465cf77b1f31a9b554491451cc94871E0A1`
+- **Explorer:** [View on Snowtrace](https://testnet.snowtrace.io/address/0xA97Cb465cf77b1f31a9b554491451cc94871E0A1)
 
-## 🚀 Ready For
+---
 
-- Subscription tracking
-- API key gating
-- x402 agent integration
-- Multi-merchant support
-- Invoice generation
+## 🧪 Testing
+
+### **Test Smart Contracts**
+```bash
+cd contract
+forge test
+```
+
+### **Build SDK**
+```bash
+npm run build:sdk
+```
+
+### **Build Application**
+```bash
+npm run build
+```
+
+### **Run Demo Pages**
+- Checkout: http://localhost:3000/checkout-demo
+- Protected Content: http://localhost:3000/protected
+- Subscriptions Dashboard: http://localhost:3000/dashboard/subscriptions
+- AI Agents Dashboard: http://localhost:3000/dashboard/analytics
+- SDK Demo: http://localhost:3000/sdk-demo
+
+---
+
+## 🎯 Use Cases
+
+- **SaaS Subscriptions** - Monthly/yearly billing
+- **Content Gating** - Paywalled premium content
+- **NFT Memberships** - Token-gated access
+- **Pay-per-view** - One-time content purchases
+- **Donations** - Crypto payment processing
+- **API Access** - API key monetization
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **Blockchain** | Avalanche (Fuji Testnet) |
+| **Smart Contracts** | Solidity 0.8.20 + Foundry |
+| **Frontend** | Next.js 16 + React 19 |
+| **Wallet** | Wagmi + Viem |
+| **Database** | Supabase (PostgreSQL) |
+| **AI** | Google Gemini 2.0 Flash |
+| **Styling** | Tailwind CSS 4 |
+| **Language** | TypeScript 5 |
+
+---
+
+## 📖 Documentation
+
+- [SDK Usage Guide](./SDK_USAGE.md) - Complete SDK documentation
+- [Contract README](./contract/README.md) - Smart contract details
+- [SDK README](./sdk/README.md) - SDK quick reference
+
+---
+
+## 🚀 Deployment
+
+### **Deploy Contracts**
+```bash
+cd contract
+forge script script/Deploy.s.sol --rpc-url fuji --broadcast
+```
+
+### **Deploy Frontend**
+```bash
+npm run build
+# Deploy to Vercel, Netlify, etc.
+```
+
+### **Publish SDK**
+```bash
+cd sdk
+npm publish
+```
+
+---
 
 ## 📝 License
 
-MIT
+MIT License - see LICENSE file for details
+
+---
+
+## 🤝 Contributing
+
+Contributions welcome! Please open an issue or PR.
+
+---
+
+## 📧 Support
+
+For issues or questions:
+- Open a GitHub issue
+- Check documentation: [SDK_USAGE.md](./SDK_USAGE.md)
+
+---
+
+**Built with ❤️ on Avalanche**

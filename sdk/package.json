@@ -1,0 +1,28 @@
+{
+  "name": "avalanche-commerce-sdk",
+  "version": "0.1.0",
+  "description": "SDK for Avalanche x402 Commerce Engine - subscriptions, payments, and access control",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "avalanche",
+    "web3",
+    "payments",
+    "subscriptions",
+    "commerce"
+  ],
+  "dependencies": {},
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "typescript": "^5.0.0"
+  }
+}
+
