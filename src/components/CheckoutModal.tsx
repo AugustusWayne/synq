@@ -4,6 +4,7 @@ import { useConnect, useAccount, useWriteContract, useWaitForTransactionReceipt,
 import { paymentsAbi, paymentsAddress, merchantAddress } from '@/lib/contract'
 import { parseEther } from 'viem'
 import { avalancheFuji } from 'wagmi/chains'
+import { useEffect, useState } from 'react'
 
 interface CheckoutModalProps {
   open: boolean
@@ -18,7 +19,54 @@ export default function CheckoutModal({ open, onClose }: CheckoutModalProps) {
   const { switchChain } = useSwitchChain()
   const { disconnect } = useDisconnect()
 
+  const [isVerifying, setIsVerifying] = useState(false)
+  const [verificationError, setVerificationError] = useState<string | null>(null)
+  const [isVerified, setIsVerified] = useState(false)
+
   const isWrongNetwork = chain?.id !== avalancheFuji.id
+
+  useEffect(() => {
+    if (isSuccess && hash && !isVerified && !isVerifying) {
+      verifyPayment()
+    }
+  }, [isSuccess, hash])
+
+  const verifyPayment = async () => {
+    if (!hash) return
+
+    setIsVerifying(true)
+    setVerificationError(null)
+
+    try {
+      console.log('Verifying payment on backend...')
+      
+      const response = await fetch('/api/payments/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          txHash: hash,
+          merchant: merchantAddress,
+          amount: 0.01,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok || !data.verified) {
+        throw new Error(data.error || 'Payment verification failed')
+      }
+
+      console.log('Payment verified successfully:', data)
+      setIsVerified(true)
+    } catch (err: any) {
+      console.error('Verification error:', err)
+      setVerificationError(err.message || 'Failed to verify payment')
+    } finally {
+      setIsVerifying(false)
+    }
+  }
 
   const handlePay = () => {
     console.log('Pay button clicked')
@@ -118,9 +166,31 @@ export default function CheckoutModal({ open, onClose }: CheckoutModalProps) {
             )}
 
             {isSuccess && (
-              <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                <p className="text-green-700 font-semibold">Payment Successful!</p>
-                <p className="text-green-600 text-sm mt-1">Transaction hash: {hash?.slice(0, 10)}...</p>
+              <div className="space-y-2">
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-green-700 font-semibold">Transaction Confirmed!</p>
+                  <p className="text-green-600 text-sm mt-1">Tx: {hash?.slice(0, 10)}...</p>
+                </div>
+
+                {isVerifying && (
+                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-blue-700 text-sm">Verifying payment on backend...</p>
+                  </div>
+                )}
+
+                {isVerified && (
+                  <div className="p-3 bg-green-50 border border-green-300 rounded-lg">
+                    <p className="text-green-800 font-semibold text-sm">✓ Payment Verified & Recorded</p>
+                  </div>
+                )}
+
+                {verificationError && (
+                  <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                    <p className="text-orange-800 text-sm font-semibold">Verification Warning</p>
+                    <p className="text-orange-700 text-xs mt-1">{verificationError}</p>
+                    <p className="text-orange-600 text-xs mt-1">Payment was sent but backend verification failed.</p>
+                  </div>
+                )}
               </div>
             )}
 
