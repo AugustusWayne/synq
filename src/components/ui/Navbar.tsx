@@ -17,7 +17,8 @@ export function Navbar({
   links = [
     { label: 'Features', href: '#features' },
     { label: 'Dashboard', href: '/dashboard' },
-    { label: 'Agents', href: '/dashboard/analytics' }
+    { label: 'Agents', href: '/dashboard/analytics' },
+    { label: 'Tools', href: '/tools/address-insights' }
   ],
   ctaText = "Launch Demo",
   ctaHref = "/checkout-demo",
