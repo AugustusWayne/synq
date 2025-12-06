@@ -14,12 +14,6 @@ interface NavbarProps {
 }
 
 export function Navbar({
-  links = [
-    { label: 'Features', href: '#features' },
-    { label: 'Dashboard', href: '/dashboard' },
-    { label: 'Agents', href: '/dashboard/analytics' },
-    { label: 'Tools', href: '/tools/address-insights' }
-  ],
   ctaText = "Launch Demo",
   ctaHref = "/checkout-demo",
   githubUrl = "https://github.com"
@@ -33,6 +27,14 @@ export function Navbar({
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  const links = [
+    { label: 'Features', href: '#features' },
+    { label: 'SDK', href: '#sdk' },
+    { label: 'Tools', href: '/tools' },
+    { label: 'Dashboard', href: '/dashboard' },
+    { label: 'Analytics', href: '/dashboard/analytics' },
+  ]
 
   const isActive = (href: string) => {
     if (href.startsWith('#')) return false
@@ -54,7 +56,7 @@ export function Navbar({
         <Link href="/" className="flex items-center gap-2">
           <Image
             src="/Gemini_Generated_Image_ae2llaae2llaae2l.png"
-            alt="synq pay Logo"
+            alt="synqpay Logo"
             width={100}
             height={100}
             className="relative z-10"

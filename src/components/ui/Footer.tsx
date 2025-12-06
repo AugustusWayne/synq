@@ -23,7 +23,7 @@ const defaultLinks: FooterLink[] = [
 ]
 
 export function Footer({
-  logoText = "synq pay",
+  logoText = "synqpay",
   tagline = "Built on Avalanche. Powered by AI.",
   links = defaultLinks
 }: FooterProps) {
@@ -33,7 +33,7 @@ export function Footer({
         <div>
           <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
             <div className="w-5 h-5 bg-[#C3FF32] rounded-sm flex items-center justify-center text-black font-bold text-xs skew-x-[-10deg]">S</div>
-            <span className="text-white font-bold tracking-tight">{logoText}</span>
+            <span className="text-white font-brand text-sm">{logoText}</span>
           </div>
           <p className="text-gray-500 text-sm">{tagline}</p>
         </div>

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useAccount } from 'wagmi'
 import { useRouter } from 'next/navigation'
 import { Loader2, CheckCircle2, ArrowRight, BarChart3, Key, BookOpen, HeadphonesIcon, RefreshCw, Wallet } from 'lucide-react'
-import AvaxCheckout from '@/components/AvaxCheckout'
+import { AvaxCheckout } from '@/components/checkout'
 import { merchantAddress } from '@/lib/contract'
 import { Navbar } from '@/components/ui'
 

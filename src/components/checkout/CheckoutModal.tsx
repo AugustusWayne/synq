@@ -9,13 +9,13 @@ import { useRouter } from 'next/navigation'
 import { X, Wallet, CheckCircle2, Loader2, AlertCircle, ExternalLink } from 'lucide-react'
 
 interface CheckoutModalProps {
-  open: boolean
+  isOpen: boolean
   onClose: () => void
   redirectTo?: string
   onSuccess?: () => void
 }
 
-export default function CheckoutModal({ open, onClose, redirectTo, onSuccess }: CheckoutModalProps) {
+export default function CheckoutModal({ isOpen, onClose, redirectTo, onSuccess }: CheckoutModalProps) {
   const router = useRouter()
   const { connectors, connect } = useConnect()
   const { isConnected, address, chain, connector } = useAccount()
@@ -44,8 +44,6 @@ export default function CheckoutModal({ open, onClose, redirectTo, onSuccess }: 
     setVerificationError(null)
 
     try {
-      console.log('Verifying payment on backend...')
-      
       const response = await fetch('/api/payments/verify', {
         method: 'POST',
         headers: {
@@ -66,14 +64,9 @@ export default function CheckoutModal({ open, onClose, redirectTo, onSuccess }: 
         throw new Error(data.error || 'Payment verification failed')
       }
 
-      console.log('Payment verified successfully:', data)
-      if (data.subscription) {
-        console.log('Subscription created:', data.subscription)
-      }
       setIsVerified(true)
 
       if (data.subscription && address) {
-        console.log('Checking access after subscription creation...')
         const accessResponse = await fetch('/api/access/verify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -84,20 +77,17 @@ export default function CheckoutModal({ open, onClose, redirectTo, onSuccess }: 
         })
 
         const accessData = await accessResponse.json()
-        console.log('Access check result:', accessData)
 
         if (accessData.access) {
           setHasAccess(true)
           
           if (onSuccess) {
-            console.log('Calling onSuccess callback')
             setTimeout(() => {
               onSuccess()
               onClose()
             }, 2000)
           } else if (redirectTo) {
             setTimeout(() => {
-              console.log('Redirecting to:', redirectTo)
               router.push(redirectTo)
             }, 2000)
           }
@@ -112,14 +102,7 @@ export default function CheckoutModal({ open, onClose, redirectTo, onSuccess }: 
   }
 
   const handlePay = () => {
-    console.log('Pay button clicked')
-    console.log('Connected:', isConnected)
-    console.log('Address:', address)
-    console.log('Chain:', chain?.id, chain?.name)
-    console.log('Contract:', paymentsAddress)
-    
     if (isWrongNetwork) {
-      console.log('Wrong network, switching to Fuji...')
       switchChain({ chainId: avalancheFuji.id })
       return
     }
@@ -132,18 +115,16 @@ export default function CheckoutModal({ open, onClose, redirectTo, onSuccess }: 
         args: [merchantAddress],
         value: parseEther('0.001'),
       })
-      console.log('Transaction initiated')
     } catch (err) {
       console.error('Error calling writeContract:', err)
     }
   }
 
-  if (!open) return null
+  if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-[#0E0E11] rounded-2xl border border-white/5 p-8 max-w-lg w-full mx-4 relative overflow-hidden group">
-        {/* Background glow */}
         <div className="absolute -inset-4 bg-[#C3FF32]/5 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
         
         <div className="relative z-10">

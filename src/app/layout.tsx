@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Poppins } from "next/font/google";
+import { Geist, Geist_Mono, Poppins, Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 
@@ -19,8 +19,14 @@ const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700", "800"],
 });
 
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+});
+
 export const metadata: Metadata = {
-  title: "synq pay - Avalanche Payments & Subscriptions",
+  title: "synqpay - Avalanche Payments & Subscriptions",
   description: "AVAX payments, subscriptions, invoicing, and automated billing workflows for Avalanche dApps. One-line integration. Developer-first.",
 };
 
@@ -32,7 +38,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} ${inter.variable} antialiased`}
         style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
       >
         <Providers>{children}</Providers>

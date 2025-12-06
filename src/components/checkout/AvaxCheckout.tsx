@@ -6,10 +6,21 @@ import CheckoutModal from './CheckoutModal'
 interface AvaxCheckoutProps {
   redirectTo?: string
   onSuccess?: () => void
+  onClose?: () => void
 }
 
-export default function AvaxCheckout({ redirectTo, onSuccess }: AvaxCheckoutProps = {}) {
+export default function AvaxCheckout({ redirectTo, onSuccess, onClose }: AvaxCheckoutProps = {}) {
   const [modalOpen, setModalOpen] = useState(false)
+
+  const handleClose = () => {
+    setModalOpen(false)
+    onClose?.()
+  }
+
+  const handleSuccess = () => {
+    setModalOpen(false)
+    onSuccess?.()
+  }
 
   return (
     <>
@@ -31,7 +42,7 @@ export default function AvaxCheckout({ redirectTo, onSuccess }: AvaxCheckoutProp
       </div>
 
       <CheckoutModal
-        open={modalOpen}
+        isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         redirectTo={redirectTo}
         onSuccess={onSuccess}

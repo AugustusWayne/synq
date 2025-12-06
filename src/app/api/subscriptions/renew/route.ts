@@ -15,7 +15,6 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    console.log('Renewing subscription:', subscription_id)
 
     const supabase = ensureSupabase()
     const { data: subData } = await supabase

@@ -1,8 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai"
 
-if (!process.env.GEMINI_API_KEY) {
-  console.warn("GEMINI_API_KEY missing in environment - AI agents will be disabled")
-}
+// GEMINI_API_KEY is required for AI agents
 
 const genAI = process.env.GEMINI_API_KEY 
   ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY)

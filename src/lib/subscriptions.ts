@@ -45,8 +45,6 @@ export async function createSubscription({
 
   if (error) throw error
 
-  console.log('Subscription created:', data)
-
   return data
 }
 
@@ -79,8 +77,6 @@ export async function renewSubscription(subId: string, txHash?: string) {
 
   if (error) throw error
 
-  console.log('Subscription renewed:', data)
-
   return data
 }
 
@@ -98,8 +94,6 @@ export async function cancelSubscription(subId: string) {
     .single()
 
   if (error) throw error
-
-  console.log('Subscription canceled:', data)
 
   return data
 }
@@ -135,7 +129,7 @@ export async function checkExpiredSubscriptions() {
       .update({ status: 'expired' })
       .in('id', expired.map((s: any) => s.id))
 
-    console.log(`Marked ${expired.length} subscriptions as expired`)
+    // Marked subscriptions as expired
   }
 
   return expired || []

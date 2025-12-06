@@ -6,7 +6,6 @@ export async function triggerWebhook(event: string, data: any) {
     const merchantId = data.merchant_id
 
     if (!merchantId) {
-      console.log('No merchant_id provided, skipping webhook')
       return
     }
 
@@ -17,33 +16,44 @@ export async function triggerWebhook(event: string, data: any) {
       .single()
 
     if (!merchant?.webhook_url) {
-      console.log(`No webhook URL configured for merchant ${merchantId}`)
       return
     }
 
-    console.log(`Triggering webhook: ${event} to ${merchant.webhook_url}`)
-
-    const response = await fetch(merchant.webhook_url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Webhook-Event': event,
-      },
-      body: JSON.stringify({
-        event,
-        data,
-        timestamp: new Date().toISOString(),
-      }),
-    })
-
-    if (!response.ok) {
-      console.error(`Webhook failed: ${response.status} ${response.statusText}`)
-      return
+    const payload = {
+      event,
+      data,
+      timestamp: new Date().toISOString(),
     }
 
-    console.log(`Webhook delivered successfully: ${event}`)
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10000)
+
+    try {
+      const response = await fetch(merchant.webhook_url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Webhook-Event': event,
+        },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      })
+
+      clearTimeout(timeoutId)
+
+      if (!response.ok) {
+        console.error(`Webhook failed: ${response.status} ${response.statusText}`)
+        return
+      }
+    } catch (fetchError: any) {
+      clearTimeout(timeoutId)
+      if (fetchError.name === 'AbortError') {
+        console.error('Webhook request timeout')
+      } else {
+        console.error('Error sending webhook:', fetchError.message)
+      }
+    }
   } catch (error) {
     console.error('Error triggering webhook:', error)
   }
 }
-

@@ -1,4 +1,4 @@
-# 📦 synq pay SDK - Complete Guide
+# 📦 synqpay SDK - Complete Guide
 
 ## 🎯 Overview
 
@@ -26,7 +26,9 @@ A TypeScript/React SDK that enables developers to integrate Avalanche-based paym
 │   └── subscriptions.ts # Subscription management, access control
 ├── /ui                  # React components
 │   ├── CheckoutButton.tsx        # Pre-built checkout button
-│   └── SubscriptionStatus.tsx    # Subscription status display
+│   ├── SubscriptionStatus.tsx    # Subscription status display
+│   ├── AIAgentsPanel.tsx         # AI agents panel for merchants
+│   └── MerchantDashboard.tsx     # Merchant dashboard widget
 ├── /types               # TypeScript definitions
 │   └── index.ts         # All types exported
 └── /dist                # Compiled output (after build)
@@ -148,6 +150,67 @@ export default function Dashboard() {
 - ✓ Active Subscription (green)
 - ⚠️ Subscription Inactive (red)
 - Expiry date (if showDetails=true)
+
+---
+
+#### `<AIAgentsPanel />`
+
+Embeddable AI agents panel for merchants. Run invoice generation, renewal management, and analytics.
+
+```tsx
+import { AIAgentsPanel } from '../sdk'
+
+export default function MerchantPage({ merchantWallet }: { merchantWallet: string }) {
+  return (
+    <AIAgentsPanel 
+      merchantWallet={merchantWallet}
+      onAgentComplete={(agent, result) => {
+        console.log(`Agent ${agent} completed:`, result)
+      }}
+    />
+  )
+}
+```
+
+**Props:**
+- `merchantWallet: string` - Merchant wallet address (required)
+- `className?: string` - Custom CSS classes
+- `onAgentComplete?: (agent: string, result: any) => void` - Callback when agent completes
+
+**Available Agents:**
+- `invoice` - Generates invoices for verified payments
+- `renew` - Manages expired subscriptions
+- `analytics` - Generates revenue insights with AI
+
+---
+
+#### `<MerchantDashboard />`
+
+Embeddable dashboard widget showing merchant statistics.
+
+```tsx
+import { MerchantDashboard } from '../sdk'
+
+export default function Dashboard({ merchantWallet }: { merchantWallet: string }) {
+  return (
+    <MerchantDashboard 
+      merchantWallet={merchantWallet}
+      showChart={false}
+    />
+  )
+}
+```
+
+**Props:**
+- `merchantWallet: string` - Merchant wallet address (required)
+- `className?: string` - Custom CSS classes
+- `showChart?: boolean` - Show revenue chart (default: false)
+
+**Displays:**
+- Total Revenue (AVAX)
+- Active Subscriptions count
+- Total Payments count
+- Subscription breakdown (Active/Canceled/Expired)
 - Loading state automatically
 
 ---

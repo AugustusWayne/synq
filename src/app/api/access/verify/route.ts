@@ -14,8 +14,6 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    console.log('Verifying access for:', { wallet, merchant, plan_id })
-
     const { data: merchantData } = await supabase
       .from('merchants')
       .select('id')
@@ -23,7 +21,6 @@ export async function POST(req: NextRequest) {
       .single()
 
     if (!merchantData) {
-      console.log('Merchant not found')
       return NextResponse.json({ access: false, reason: 'Merchant not found' })
     }
 
@@ -41,7 +38,6 @@ export async function POST(req: NextRequest) {
     const { data: subscriptions } = await query
 
     if (!subscriptions || subscriptions.length === 0) {
-      console.log('No active subscription found')
       return NextResponse.json({ 
         access: false, 
         reason: 'No active subscription found' 
@@ -54,14 +50,11 @@ export async function POST(req: NextRequest) {
     )
 
     if (!activeSubscription) {
-      console.log('Subscription expired')
       return NextResponse.json({ 
         access: false, 
         reason: 'Subscription expired' 
       })
     }
-
-    console.log('Access granted:', activeSubscription.id)
 
     return NextResponse.json({
       access: true,

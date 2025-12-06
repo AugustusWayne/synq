@@ -47,7 +47,6 @@ export async function POST(req: NextRequest) {
 
     if (error) throw error
 
-    console.log('Plan created:', plan)
 
     return NextResponse.json({
       plan_id: plan.id,

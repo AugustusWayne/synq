@@ -15,7 +15,6 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    console.log('Canceling subscription:', subscription_id)
 
     const supabase = ensureSupabase()
     const { data: subData } = await supabase
@@ -24,9 +23,16 @@ export async function POST(req: NextRequest) {
       .eq('id', subscription_id)
       .single()
 
+    if (!subData) {
+      return NextResponse.json(
+        { error: 'Subscription not found' },
+        { status: 404 }
+      )
+    }
+
     const subscription = await cancelSubscription(subscription_id)
 
-    if (subData?.merchant_id) {
+    if (subData.merchant_id) {
       await triggerWebhook('subscription_canceled', {
         merchant_id: subData.merchant_id,
         subscription_id: subscription.id,

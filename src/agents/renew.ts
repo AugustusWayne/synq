@@ -2,16 +2,31 @@ import { ensureSupabase } from "@/lib/db"
 import { geminiGenerate } from "./gemini"
 import { calculateNextBilling } from "@/lib/subscriptions"
 
-export async function runRenewAgent() {
+export async function runRenewAgent(merchantWallet?: string) {
   const supabase = ensureSupabase()
   const now = Math.floor(Date.now() / 1000)
 
-  const { data: subs } = await supabase
+  let query = supabase
     .from("subscriptions")
     .select("*, plans(*)")
     .eq("status", "active")
     .lt("current_period_end", now)
     .limit(20)
+
+  // If merchantWallet provided, filter by merchant
+  if (merchantWallet) {
+    const { data: merchant } = await supabase
+      .from("merchants")
+      .select("id")
+      .eq("wallet", merchantWallet.toLowerCase())
+      .single()
+
+    if (merchant) {
+      query = query.eq("merchant_id", merchant.id)
+    }
+  }
+
+  const { data: subs } = await query
 
   if (!subs || subs.length === 0) {
     return { status: "no-expired-subscriptions", renewed: 0 }
@@ -50,8 +65,6 @@ Keep it:
 - Mention benefits of staying subscribed
 - Brief (3-4 sentences)
       `)
-
-      console.log(`Renewal Notice for ${sub.id}:`, msg)
 
       renewed++
     } catch (error) {

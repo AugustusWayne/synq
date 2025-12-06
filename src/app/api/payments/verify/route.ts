@@ -25,8 +25,6 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    console.log('Verifying payment:', { txHash, merchant, amount, plan_id, create_subscription })
-
     const transaction = await publicClient.getTransactionReceipt({
       hash: txHash as `0x${string}`,
     })
@@ -38,16 +36,12 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    console.log('Transaction found, block:', transaction.blockNumber)
-
     const logs = await publicClient.getLogs({
       address: paymentsAddress,
       event: parseAbiItem('event PaymentReceived(address indexed merchant, address indexed payer, uint256 amount, uint256 timestamp)'),
       fromBlock: transaction.blockNumber,
       toBlock: transaction.blockNumber,
     })
-
-    console.log('Found logs:', logs.length)
 
     const matchingLog = logs.find(
       (log: any) => 
@@ -69,8 +63,6 @@ export async function POST(req: NextRequest) {
       timestamp: bigint
     }
 
-    console.log('Event verified:', eventData)
-
     const { data: merchantData } = await supabase
       .from('merchants')
       .select('id')
@@ -80,7 +72,6 @@ export async function POST(req: NextRequest) {
     let merchantId = merchantData?.id
 
     if (!merchantId) {
-      console.log('Merchant not found, creating new merchant')
       const { data: newMerchant, error } = await supabase
         .from('merchants')
         .insert({
@@ -116,7 +107,6 @@ export async function POST(req: NextRequest) {
 
     if (paymentError) {
       if (paymentError.code === '23505') {
-        console.log('Payment already recorded')
         return NextResponse.json({
           verified: true,
           message: 'Payment already recorded',
@@ -134,8 +124,6 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    console.log('Payment verified + saved:', paymentRecord)
-
     await triggerWebhook('payment_succeeded', {
       merchant_id: merchantId,
       payment_id: paymentRecord.id,
@@ -149,7 +137,6 @@ export async function POST(req: NextRequest) {
     let subscriptionData = null
 
     if ((create_subscription || plan_id) && plan_id) {
-      console.log('Creating subscription for payment...')
       try {
         subscriptionData = await createSubscription({
           merchantId,
@@ -168,7 +155,6 @@ export async function POST(req: NextRequest) {
           current_period_end: subscriptionData.current_period_end,
         })
 
-        console.log('Subscription created:', subscriptionData.id)
       } catch (subError: any) {
         console.error('Failed to create subscription:', subError)
       }

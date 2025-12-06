@@ -6,17 +6,23 @@ import { runAnalyticsAgent } from '@/agents/analytics'
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { agent, merchantId } = body
+    const { agent, merchantId, merchantWallet } = body
 
-    console.log(`Running agent: ${agent}`, merchantId ? `for merchant: ${merchantId}` : '')
+    // Verify merchant wallet is provided
+    if (!merchantWallet) {
+      return NextResponse.json(
+        { error: 'Merchant wallet required' },
+        { status: 401 }
+      )
+    }
 
     if (agent === 'invoice') {
-      const result = await runInvoiceAgent()
+      const result = await runInvoiceAgent(merchantWallet)
       return NextResponse.json(result)
     }
 
     if (agent === 'renew') {
-      const result = await runRenewAgent()
+      const result = await runRenewAgent(merchantWallet)
       return NextResponse.json(result)
     }
 

@@ -1,6 +1,8 @@
-# 🏔️ Avalanche x402 Commerce Engine
+# 💚 synqpay
 
 **Full-stack Web3 payment and subscription platform powered by Avalanche, with AI automation.**
+
+> **synqpay** - Seamless payments, subscriptions, and merchant tools on Avalanche.
 
 [![Avalanche](https://img.shields.io/badge/Avalanche-Fuji-E84142)](https://testnet.snowtrace.io)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org)
@@ -44,14 +46,18 @@ npm install
 ```
 
 ### **2. Configure Environment**
-Create `.env.local`:
+Copy `.env.example` to `.env.local` and fill in your credentials:
 ```bash
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_SERVICE_KEY=your-service-role-key
+cp .env.example .env.local
+```
 
-# AI (optional)
-GEMINI_API_KEY=your-gemini-api-key
+Required variables:
+- `NEXT_PUBLIC_SUPABASE_URL` - Your Supabase project URL
+- `SUPABASE_SERVICE_KEY` - Supabase service role key
+
+Optional variables:
+- `GEMINI_API_KEY` - For AI agents (invoice, renewal, analytics)
+- `WEBHOOK_SECRET` - For webhook verification
 ```
 
 ### **3. Set up Database**

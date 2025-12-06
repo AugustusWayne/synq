@@ -1,35 +1,45 @@
 import { ensureSupabase } from "@/lib/db"
 import { geminiGenerate } from "./gemini"
 
-export async function runInvoiceAgent() {
+export async function runInvoiceAgent(merchantWallet?: string) {
   const supabase = ensureSupabase()
   
-  console.log('Invoice Agent: Querying payments...')
-  
-  const { data: payments, error: queryError } = await supabase
+  let query = supabase
     .from("payments")
     .select("*")
     .eq("status", "verified")
     .or("invoice_sent.is.null,invoice_sent.eq.false")
     .limit(10)
 
+  // If merchantWallet provided, filter by merchant
+  if (merchantWallet) {
+    const { data: merchant } = await supabase
+      .from("merchants")
+      .select("id")
+      .eq("wallet", merchantWallet.toLowerCase())
+      .single()
+
+    if (merchant) {
+      query = query.eq("merchant_id", merchant.id)
+    }
+  }
+
+  const { data: payments, error: queryError } = await query
+
   if (queryError) {
     console.error('Query error:', queryError)
     throw queryError
   }
-
-  console.log(`Invoice Agent: Found ${payments?.length || 0} payments needing invoices`)
 
   if (!payments || payments.length === 0) {
     return { status: "no-new-payments", processed: 0 }
   }
 
   let processed = 0
+  const generatedInvoices: any[] = []
 
   for (const p of payments) {
     try {
-      console.log(`Processing payment: ${p.id}`)
-      
       const { data: merchant } = await supabase
         .from("merchants")
         .select("*")
@@ -37,11 +47,8 @@ export async function runInvoiceAgent() {
         .single()
 
       if (!merchant) {
-        console.log(`Merchant not found for payment ${p.id}`)
         continue
       }
-
-      console.log(`Generating invoice for payment ${p.id}...`)
 
       const invoiceText = await geminiGenerate(`
 Generate a professional invoice in plain text format:
@@ -61,27 +68,34 @@ Include:
 - Keep it concise and professional
       `)
 
-      console.log("Generated Invoice:")
-      console.log(invoiceText)
-      console.log('---')
-
       const { error: updateError } = await supabase
         .from("payments")
-        .update({ invoice_sent: true })
+        .update({ 
+          invoice_sent: true,
+          invoice_text: invoiceText 
+        })
         .eq("id", p.id)
 
       if (updateError) {
         console.error(`Failed to update payment ${p.id}:`, updateError)
       } else {
-        console.log(`✓ Invoice generated and marked for payment ${p.id}`)
         processed++
+        generatedInvoices.push({
+          id: p.id,
+          invoice_number: `INV-${p.id.slice(0, 8).toUpperCase()}`,
+          amount: (Number(p.amount) / 1e18).toFixed(4),
+          text: invoiceText
+        })
       }
     } catch (error) {
       console.error(`Failed to generate invoice for payment ${p.id}:`, error)
     }
   }
 
-  console.log(`Invoice Agent: Processed ${processed} invoices`)
-  return { status: "ok", processed }
+  return { 
+    status: "ok", 
+    processed,
+    invoices: generatedInvoices
+  }
 }
 

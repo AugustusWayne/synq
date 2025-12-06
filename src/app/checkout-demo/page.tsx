@@ -1,6 +1,6 @@
 'use client'
 
-import AvaxCheckout from '@/components/AvaxCheckout'
+import { AvaxCheckout } from '@/components/checkout'
 import { useWatchContractEvent } from 'wagmi'
 import { paymentsAbi, paymentsAddress } from '@/lib/contract'
 import { Navbar } from '@/components/ui'
@@ -12,13 +12,7 @@ export default function CheckoutDemoPage() {
     abi: paymentsAbi,
     eventName: 'PaymentReceived',
     onLogs(logs) {
-      console.log('Payment event received:', logs)
-      logs.forEach((log: any) => {
-        console.log('Merchant:', log.args.merchant)
-        console.log('Payer:', log.args.payer)
-        console.log('Amount:', log.args.amount?.toString())
-        console.log('Timestamp:', log.args.timestamp?.toString())
-      })
+      // Payment events handled silently
     }
   })
 
@@ -39,8 +33,8 @@ export default function CheckoutDemoPage() {
               Live Demo
             </div> */}
 
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
-              synq pay
+            <h1 className="text-4xl md:text-5xl font-brand text-white mb-4 leading-tight">
+              SYNQPAY
               <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#C3FF32] via-[#e2ff8d] to-white">
                 Checkout Demo

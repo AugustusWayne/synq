@@ -14,7 +14,6 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    console.log('Creating subscription:', { merchant_id, customer_wallet, plan_id })
 
     const subscription = await createSubscription({
       merchantId: merchant_id,

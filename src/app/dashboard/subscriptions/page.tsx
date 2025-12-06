@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useAccount } from 'wagmi'
+import { useRouter } from 'next/navigation'
 import { Navbar } from '@/components/ui'
 import { Loader2, AlertCircle, CheckCircle2, XCircle, Clock, Users } from 'lucide-react'
 
@@ -20,15 +21,43 @@ interface Subscription {
 
 export default function SubscriptionsDashboard() {
   const { address } = useAccount()
+  const router = useRouter()
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isMerchant, setIsMerchant] = useState<boolean | null>(null)
+  const [verifying, setVerifying] = useState(true)
 
   useEffect(() => {
     if (address) {
-      fetchSubscriptions()
+      verifyMerchantAndFetch()
+    } else {
+      setVerifying(false)
+      setLoading(false)
     }
   }, [address])
+
+  const verifyMerchantAndFetch = async () => {
+    try {
+      setVerifying(true)
+      const response = await fetch('/api/merchants/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ wallet: address })
+      })
+      const data = await response.json()
+      setIsMerchant(data.isMerchant)
+      
+      if (data.isMerchant) {
+        await fetchSubscriptions()
+      }
+    } catch (error) {
+      console.error('Error verifying merchant:', error)
+      setIsMerchant(false)
+    } finally {
+      setVerifying(false)
+    }
+  }
 
   const fetchSubscriptions = async () => {
     try {
@@ -80,15 +109,57 @@ export default function SubscriptionsDashboard() {
     }
   }
 
+  if (verifying) {
+    return (
+      <div className="bg-[#0A0A0C] min-h-screen text-white font-sans">
+        <Navbar />
+        <main className="min-h-screen pt-32 pb-16 px-4 flex items-center justify-center">
+          <div className="bg-[#0E0E11] rounded-2xl border border-white/5 p-8 text-center max-w-md">
+            <Loader2 className="animate-spin h-8 w-8 text-[#C3FF32] mx-auto mb-4" />
+            <p className="text-gray-400">Verifying merchant access...</p>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
   if (!address) {
     return (
       <div className="bg-[#0A0A0C] min-h-screen text-white font-sans">
         <Navbar />
-        <main className="min-h-screen pt-32 pb-16 px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="bg-[#0E0E11] rounded-2xl border border-white/5 p-8 text-center">
-              <p className="text-gray-400">Please connect your wallet to view subscriptions.</p>
+        <main className="min-h-screen pt-32 pb-16 px-4 flex items-center justify-center">
+          <div className="bg-[#0E0E11] rounded-2xl border border-white/5 p-8 text-center max-w-md">
+            <p className="text-xl font-bold text-white mb-4">Merchant Access Required</p>
+            <p className="text-gray-400 mb-6">Please connect your wallet to view subscriptions.</p>
+            <p className="text-sm text-gray-500">This dashboard is restricted to registered merchants only.</p>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  if (isMerchant === false) {
+    return (
+      <div className="bg-[#0A0A0C] min-h-screen text-white font-sans">
+        <Navbar />
+        <main className="min-h-screen pt-32 pb-16 px-4 flex items-center justify-center">
+          <div className="bg-[#0E0E11] rounded-2xl border border-red-500/10 p-8 text-center max-w-md">
+            <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertCircle size={32} className="text-red-400" />
             </div>
+            <p className="text-xl font-bold text-white mb-4">Merchant Subscriptions</p>
+            <p className="text-gray-400 mb-6">
+              Subscription management is for merchants only. Your wallet <span className="font-mono text-gray-500">{address.slice(0,6)}...{address.slice(-4)}</span> is not registered.
+            </p>
+            <p className="text-sm text-gray-500 mb-6">
+              To become a merchant, receive payments through synqpay.
+            </p>
+            <button
+              onClick={() => router.push('/')}
+              className="px-6 py-3 bg-[#C3FF32] text-black rounded-lg hover:bg-[#b0e62e] transition-all font-bold"
+            >
+              Go to Homepage
+            </button>
           </div>
         </main>
       </div>

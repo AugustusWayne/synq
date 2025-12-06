@@ -1,4 +1,4 @@
-# synq pay SDK
+# synqpay SDK
 
 TypeScript/React SDK for integrating Avalanche-based payments and subscriptions into your app.
 
@@ -82,6 +82,79 @@ if (access) {
   // Grant access to premium content
 }
 ```
+
+### 5. AI Agents Panel (Merchants)
+
+```tsx
+import { AIAgentsPanel } from 'synq-sdk'
+
+export default function MerchantPage({ merchantWallet }: { merchantWallet: string }) {
+  return (
+    <AIAgentsPanel 
+      merchantWallet={merchantWallet}
+      onAgentComplete={(agent, result) => {
+        console.log(`Agent ${agent} completed:`, result)
+      }}
+    />
+  )
+}
+```
+
+### 6. Merchant Dashboard Widget
+
+```tsx
+import { MerchantDashboard } from 'synq-sdk'
+
+export default function Dashboard({ merchantWallet }: { merchantWallet: string }) {
+  return (
+    <MerchantDashboard 
+      merchantWallet={merchantWallet}
+      showChart={true}
+    />
+  )
+}
+```
+
+## Components
+
+### `CheckoutButton`
+Pre-built checkout button for payments and subscriptions.
+
+**Props:**
+- `amount?: number` - Payment amount in AVAX (default: 0.01)
+- `planId?: string` - Optional subscription plan ID
+- `label?: string` - Button text (default: "Subscribe")
+- `className?: string` - Custom CSS classes
+- `onCheckout?: () => void` - Callback when button clicked
+
+### `SubscriptionStatus`
+Display subscription status for a wallet.
+
+**Props:**
+- `wallet: string` - Wallet address to check
+- `showDetails?: boolean` - Show expiration date (default: true)
+- `className?: string` - Custom CSS classes
+
+### `AIAgentsPanel`
+Embeddable AI agents panel for merchants.
+
+**Props:**
+- `merchantWallet: string` - Merchant wallet address
+- `className?: string` - Custom CSS classes
+- `onAgentComplete?: (agent: string, result: any) => void` - Callback when agent completes
+
+**Agents:**
+- `invoice` - Generates invoices for verified payments
+- `renew` - Manages expired subscriptions
+- `analytics` - Generates revenue insights
+
+### `MerchantDashboard`
+Embeddable dashboard widget showing merchant statistics.
+
+**Props:**
+- `merchantWallet: string` - Merchant wallet address
+- `className?: string` - Custom CSS classes
+- `showChart?: boolean` - Show revenue chart (default: false)
 
 ## API Reference
 

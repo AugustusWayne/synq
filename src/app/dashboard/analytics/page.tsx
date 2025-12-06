@@ -1,16 +1,103 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAccount } from 'wagmi'
+import { useRouter } from 'next/navigation'
 import { Navbar } from '@/components/ui'
 import { FileText, RefreshCw, BarChart3, Loader2, Zap, AlertCircle, CheckCircle2 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 
 export default function AnalyticsPage() {
   const { address } = useAccount()
+  const router = useRouter()
   const [loading, setLoading] = useState<string | null>(null)
   const [result, setResult] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
+  const [isMerchant, setIsMerchant] = useState<boolean | null>(null)
+  const [verifying, setVerifying] = useState(true)
+
+  useEffect(() => {
+    if (address) {
+      verifyMerchant()
+    } else {
+      setVerifying(false)
+    }
+  }, [address])
+
+  const verifyMerchant = async () => {
+    try {
+      setVerifying(true)
+      const response = await fetch('/api/merchants/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ wallet: address })
+      })
+      const data = await response.json()
+      setIsMerchant(data.isMerchant)
+    } catch (error) {
+      console.error('Error verifying merchant:', error)
+      setIsMerchant(false)
+    } finally {
+      setVerifying(false)
+    }
+  }
+
+  if (verifying) {
+    return (
+      <div className="bg-[#0A0A0C] min-h-screen text-white font-sans">
+        <Navbar />
+        <main className="min-h-screen pt-32 pb-16 px-4 flex items-center justify-center">
+          <div className="bg-[#0E0E11] rounded-2xl border border-white/5 p-8 text-center max-w-md">
+            <Loader2 className="animate-spin h-8 w-8 text-[#C3FF32] mx-auto mb-4" />
+            <p className="text-gray-400">Verifying merchant access...</p>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  if (!address) {
+    return (
+      <div className="bg-[#0A0A0C] min-h-screen text-white font-sans">
+        <Navbar />
+        <main className="min-h-screen pt-32 pb-16 px-4 flex items-center justify-center">
+          <div className="bg-[#0E0E11] rounded-2xl border border-white/5 p-8 text-center max-w-md">
+            <p className="text-xl font-bold text-white mb-4">Merchant Access Required</p>
+            <p className="text-gray-400 mb-6">Please connect your wallet to access AI agents.</p>
+            <p className="text-sm text-gray-500">This dashboard is restricted to registered merchants only.</p>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  if (isMerchant === false) {
+    return (
+      <div className="bg-[#0A0A0C] min-h-screen text-white font-sans">
+        <Navbar />
+        <main className="min-h-screen pt-32 pb-16 px-4 flex items-center justify-center">
+          <div className="bg-[#0E0E11] rounded-2xl border border-red-500/10 p-8 text-center max-w-md">
+            <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertCircle size={32} className="text-red-400" />
+            </div>
+            <p className="text-xl font-bold text-white mb-4">Merchant Analytics</p>
+            <p className="text-gray-400 mb-6">
+              AI-powered analytics dashboard is for merchants only. Your wallet <span className="font-mono text-gray-500">{address.slice(0,6)}...{address.slice(-4)}</span> is not registered.
+            </p>
+            <p className="text-sm text-gray-500 mb-6">
+              To become a merchant and access AI agents, receive payments through synqpay.
+            </p>
+            <button
+              onClick={() => router.push('/')}
+              className="px-6 py-3 bg-[#C3FF32] text-black rounded-lg hover:bg-[#b0e62e] transition-all font-bold"
+            >
+              Go to Homepage
+            </button>
+          </div>
+        </main>
+      </div>
+    )
+  }
 
   const runAgent = async (agentName: string) => {
     setLoading(agentName)
@@ -24,6 +111,7 @@ export default function AnalyticsPage() {
         body: JSON.stringify({
           agent: agentName,
           merchantId: address ? await getMerchantId(address) : null,
+          merchantWallet: address,
         }),
       })
 
@@ -188,9 +276,45 @@ export default function AnalyticsPage() {
                 )}
 
                 {result.processed !== undefined && (
-                  <p className="text-gray-300 mb-3">
-                    <strong className="text-white">Processed:</strong> {result.processed} invoices
-                  </p>
+                  <div className="mb-6">
+                    <p className="text-gray-300 mb-3">
+                      <strong className="text-white">Processed:</strong> {result.processed} invoices
+                    </p>
+                    
+                    {result.invoices && result.invoices.length > 0 && (
+                      <div className="bg-white/5 border border-white/5 rounded-xl p-4 space-y-3">
+                        <p className="text-sm font-semibold text-white mb-3">Generated Invoices:</p>
+                        {result.invoices.map((inv: any) => (
+                          <div key={inv.id} className="bg-[#050505] border border-white/5 rounded-lg p-4">
+                            <div className="flex items-start justify-between mb-2">
+                              <div>
+                                <p className="text-[#C3FF32] font-mono font-bold text-sm">{inv.invoice_number}</p>
+                                <p className="text-gray-400 text-xs mt-1">Amount: {inv.amount} AVAX</p>
+                              </div>
+                              <button
+                                onClick={() => {
+                                  const blob = new Blob([inv.text], { type: 'text/plain' })
+                                  const url = URL.createObjectURL(blob)
+                                  const a = document.createElement('a')
+                                  a.href = url
+                                  a.download = `${inv.invoice_number}.txt`
+                                  a.click()
+                                  URL.revokeObjectURL(url)
+                                }}
+                                className="px-3 py-1 bg-[#C3FF32]/10 hover:bg-[#C3FF32]/20 border border-[#C3FF32]/20 text-[#C3FF32] rounded-lg text-xs font-semibold transition-colors flex items-center gap-1"
+                              >
+                                <FileText size={12} />
+                                Download
+                              </button>
+                            </div>
+                            <pre className="text-xs text-gray-400 whitespace-pre-wrap font-mono bg-black/30 p-3 rounded mt-2 max-h-32 overflow-y-auto">
+                              {inv.text}
+                            </pre>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 {result.count !== undefined && (

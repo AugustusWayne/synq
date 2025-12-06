@@ -4,14 +4,15 @@ import type { NextRequest } from 'next/server'
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
-  if (pathname.startsWith('/protected')) {
-    console.log('Protected route accessed:', pathname)
+  // Dashboard routes require merchant access
+  if (pathname.startsWith('/dashboard')) {
+    return NextResponse.next()
   }
 
   return NextResponse.next()
 }
 
 export const config = {
-  matcher: ['/protected/:path*'],
+  matcher: ['/protected/:path*', '/dashboard/:path*'],
 }
 

@@ -16,6 +16,7 @@
 # next.js
 /.next/
 /out/
+.next/dev/logs/
 
 # production
 /build
@@ -57,6 +58,8 @@ contract/out/
 contract/cache/
 contract/broadcast/
 contract/.env
+
+# contract/src/deployed.json
 
 # temp files
 *.tmp
