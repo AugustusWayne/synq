@@ -173,7 +173,7 @@ Checks if a wallet has active subscription access.
 #### `getSubscriptionStatus(wallet)`
 Gets subscription status for a wallet.
 
-**Returns:** `SubscriptionStatus`
+**Returns:** `SubscriptionStatusData`
 
 #### `listSubscriptions({ merchant?, customer? })`
 Lists subscriptions filtered by merchant or customer.
@@ -212,7 +212,7 @@ All TypeScript types are exported:
 import type { 
   CheckoutOptions,
   VerifyResponse,
-  SubscriptionStatus,
+  SubscriptionStatusData,
   Plan,
   Subscription,
   AccessResponse
