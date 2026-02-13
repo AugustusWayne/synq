@@ -37,11 +37,14 @@ export interface Plan {
 export interface Subscription {
   id: string
   merchant_id: string
+  /** Customer wallet address (alias for payer_wallet in API responses) */
+  customer?: string
   payer_wallet: string
   plan_id: string
   status: 'active' | 'canceled' | 'expired' | 'payment_required'
   current_period_end: number
-  created_at: string
+  created_at?: string
+  updated_at?: string
 }
 
 export interface AccessResponse {
