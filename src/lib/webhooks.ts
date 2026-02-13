@@ -1,5 +1,11 @@
 import { ensureSupabase } from './db'
 
+/**
+ * Sends a webhook payload to the merchant's configured webhook_url.
+ * No-op if merchant has no webhook_url or payload is missing merchant_id.
+ * @param event - Event name (e.g. payment_succeeded, subscription_created)
+ * @param data - Payload including merchant_id; forwarded to the merchant endpoint
+ */
 export async function triggerWebhook(event: string, data: any) {
   try {
     const supabase = ensureSupabase()

@@ -8,6 +8,10 @@ export interface CreateSubscriptionParams {
   txHash?: string
 }
 
+/**
+ * Creates a new subscription for a customer on a plan.
+ * @throws Error if plan not found or insert fails
+ */
 export async function createSubscription({
   merchantId,
   customer,
@@ -48,6 +52,10 @@ export async function createSubscription({
   return data
 }
 
+/**
+ * Renews a subscription: extends current_period_end using the plan's interval.
+ * @throws Error if subscription or plan not found
+ */
 export async function renewSubscription(subId: string, txHash?: string) {
   const supabase = ensureSupabase()
 
@@ -84,6 +92,7 @@ export async function renewSubscription(subId: string, txHash?: string) {
   return data
 }
 
+/** Cancels a subscription by ID (sets status to canceled). */
 export async function cancelSubscription(subId: string) {
   const supabase = ensureSupabase()
 
@@ -102,6 +111,7 @@ export async function cancelSubscription(subId: string) {
   return data
 }
 
+/** Returns Unix timestamp for end of next billing period (weekly / monthly / yearly). */
 export function calculateNextBilling(interval: string): number {
   const now = Math.floor(Date.now() / 1000)
 
@@ -117,6 +127,7 @@ export function calculateNextBilling(interval: string): number {
   }
 }
 
+/** Marks active subscriptions past current_period_end as expired. Returns list of expired rows. */
 export async function checkExpiredSubscriptions() {
   const supabase = ensureSupabase()
   const now = Math.floor(Date.now() / 1000)
