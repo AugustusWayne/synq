@@ -79,7 +79,7 @@ Visit: **http://localhost:3000**
 ## 📁 Project Structure
 
 ```
-avax-402/
+synq/
 ├── contract/              # Smart contracts (Foundry)
 │   ├── src/
 │   │   └── Payments.sol  # Main payment contract
