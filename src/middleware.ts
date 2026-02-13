@@ -4,8 +4,8 @@ import type { NextRequest } from 'next/server'
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
-  // Dashboard routes require merchant access
-  if (pathname.startsWith('/dashboard')) {
+  // Protected and dashboard routes (auth not enforced in middleware)
+  if (pathname.startsWith('/dashboard') || pathname.startsWith('/protected')) {
     return NextResponse.next()
   }
 
