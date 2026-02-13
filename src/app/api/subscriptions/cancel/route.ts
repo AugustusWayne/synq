@@ -8,13 +8,20 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const { subscription_id } = body
 
-    if (!subscription_id) {
+    if (!subscription_id || typeof subscription_id !== 'string') {
       return NextResponse.json(
         { error: 'Missing required field: subscription_id' },
         { status: 400 }
       )
     }
 
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+    if (!uuidRegex.test(subscription_id.trim())) {
+      return NextResponse.json(
+        { error: 'Invalid subscription_id format (expected UUID)' },
+        { status: 400 }
+      )
+    }
 
     const supabase = ensureSupabase()
     const { data: subData } = await supabase
