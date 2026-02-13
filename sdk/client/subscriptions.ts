@@ -1,5 +1,10 @@
 import { SubscriptionStatusData, Subscription, AccessResponse } from "../types"
 
+/**
+ * Gets subscription status for a customer wallet.
+ * @param wallet - Customer wallet address
+ * @returns SubscriptionStatusData with active flag and optional subscription details
+ */
 export async function getSubscriptionStatus(wallet: string): Promise<SubscriptionStatusData> {
   const res = await fetch(`/api/subscriptions/list?customer=${wallet}`)
   const data = await res.json()
@@ -25,6 +30,13 @@ export async function getSubscriptionStatus(wallet: string): Promise<Subscriptio
   }
 }
 
+/**
+ * Checks if a wallet has active subscription access for a merchant/plan.
+ * @param wallet - Customer wallet address
+ * @param merchant - Merchant wallet address
+ * @param planId - Optional plan ID to check against
+ * @returns AccessResponse with access boolean and optional subscription info
+ */
 export async function checkAccess(
   wallet: string,
   merchant: string,
@@ -45,6 +57,11 @@ export async function checkAccess(
   return await res.json()
 }
 
+/**
+ * Cancels an active subscription by ID.
+ * @param subscriptionId - Subscription UUID to cancel
+ * @returns API response with success or error
+ */
 export async function cancelSubscription(subscriptionId: string) {
   const res = await fetch("/api/subscriptions/cancel", {
     method: "POST",
@@ -59,6 +76,11 @@ export async function cancelSubscription(subscriptionId: string) {
   return await res.json()
 }
 
+/**
+ * Lists subscriptions filtered by merchant and/or customer.
+ * @param params - Optional merchant and customer wallet filters
+ * @returns API response with subscriptions array and count
+ */
 export async function listSubscriptions(params: {
   merchant?: string
   customer?: string
