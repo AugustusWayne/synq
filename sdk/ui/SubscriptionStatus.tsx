@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import { getSubscriptionStatus } from "../client/subscriptions"
 import type { SubscriptionStatusData } from "../types"
 
@@ -18,13 +18,7 @@ export function SubscriptionStatus({
   const [status, setStatus] = useState<SubscriptionStatusData | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    if (wallet) {
-      loadStatus()
-    }
-  }, [wallet])
-
-  async function loadStatus() {
+  const loadStatus = useCallback(async () => {
     try {
       setLoading(true)
       const data = await getSubscriptionStatus(wallet)
@@ -34,7 +28,13 @@ export function SubscriptionStatus({
     } finally {
       setLoading(false)
     }
-  }
+  }, [wallet])
+
+  useEffect(() => {
+    if (wallet) {
+      loadStatus()
+    }
+  }, [wallet, loadStatus])
 
   if (loading) {
     return (
