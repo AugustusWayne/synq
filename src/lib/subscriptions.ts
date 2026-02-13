@@ -61,6 +61,10 @@ export async function renewSubscription(subId: string, txHash?: string) {
     throw new Error('Subscription not found')
   }
 
+  if (!subscription.plans) {
+    throw new Error('Plan not found for subscription')
+  }
+
   const newPeriodEnd = calculateNextBilling(subscription.plans.interval)
 
   const { data, error } = await supabase
