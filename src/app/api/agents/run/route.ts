@@ -3,6 +3,12 @@ import { runInvoiceAgent } from '@/agents/invoice'
 import { runRenewAgent } from '@/agents/renew'
 import { runAnalyticsAgent } from '@/agents/analytics'
 
+/** Common shape for agent run API responses (invoice, renew, analytics) */
+export type AgentRunResponse =
+  | { status: string; count?: number; renewed?: number; error?: string }
+  | { invoices?: unknown[]; error?: string }
+  | { insights?: string; error?: string }
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
