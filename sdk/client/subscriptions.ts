@@ -95,6 +95,11 @@ export async function listSubscriptions(params: {
   if (params.customer) searchParams.append("customer", params.customer)
 
   const res = await fetch(`/api/subscriptions/list?${searchParams.toString()}`)
-  return await res.json()
+  const data = await res.json()
+  if (!res.ok) {
+    const message = (data?.error ?? data?.message ?? res.statusText) as string
+    throw new Error(`Failed to list subscriptions: ${message}`)
+  }
+  return data
 }
 

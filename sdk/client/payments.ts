@@ -66,6 +66,11 @@ export function createCheckoutUrl(opts: {
  */
 export async function getPaymentHistory(merchantId: string) {
   const res = await fetch(`/api/payments/list?merchant=${merchantId}`)
-  return await res.json()
+  const data = await res.json()
+  if (!res.ok) {
+    const message = (data?.error ?? data?.message ?? res.statusText) as string
+    throw new Error(`Failed to list payments: ${message}`)
+  }
+  return data
 }
 
