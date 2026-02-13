@@ -29,7 +29,15 @@ export async function verifyPayment(
   })
 
   if (!res.ok) {
-    throw new Error(`Payment verification failed: ${res.statusText}`)
+    let message = res.statusText
+    try {
+      const body = await res.json()
+      if (body?.error) message = body.error
+      else if (body?.message) message = body.message
+    } catch {
+      // ignore non-JSON response
+    }
+    throw new Error(`Payment verification failed: ${message}`)
   }
 
   return (await res.json()) as VerifyResponse

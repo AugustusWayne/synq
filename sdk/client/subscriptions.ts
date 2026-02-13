@@ -73,7 +73,12 @@ export async function cancelSubscription(subscriptionId: string) {
     }),
   })
 
-  return await res.json()
+  const data = await res.json()
+  if (!res.ok) {
+    const message = (data?.error ?? data?.message ?? res.statusText) as string
+    throw new Error(`Cancel subscription failed: ${message}`)
+  }
+  return data
 }
 
 /**
