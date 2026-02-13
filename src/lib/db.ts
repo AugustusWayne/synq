@@ -1,17 +1,30 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || ''
 
-export const supabase = supabaseUrl && supabaseServiceKey 
-  ? createClient(supabaseUrl, supabaseServiceKey)
-  : null
+/** Supabase client instance (null if env vars are missing) */
+export const supabase: SupabaseClient | null =
+  supabaseUrl && supabaseServiceKey
+    ? createClient(supabaseUrl, supabaseServiceKey)
+    : null
 
-export function ensureSupabase() {
+/**
+ * Returns the Supabase client or throws if not configured.
+ * Use in API routes and server code that require DB access.
+ */
+export function ensureSupabase(): SupabaseClient {
   if (!supabase) {
-    throw new Error('Supabase not configured. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_KEY environment variables.')
+    throw new Error(
+      'Supabase not configured. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_KEY environment variables.'
+    )
   }
   return supabase
+}
+
+/** Type guard: true when Supabase is configured and available */
+export function isSupabaseConfigured(): boolean {
+  return supabase !== null
 }
 
 export type Merchant = {
