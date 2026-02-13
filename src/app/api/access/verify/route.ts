@@ -21,7 +21,10 @@ export async function POST(req: NextRequest) {
       .single()
 
     if (!merchantData) {
-      return NextResponse.json({ access: false, reason: 'Merchant not found' })
+      return NextResponse.json(
+        { access: false, reason: 'Merchant not found', error: 'Merchant not found' },
+        { status: 404 }
+      )
     }
 
     let query = supabase
@@ -38,10 +41,10 @@ export async function POST(req: NextRequest) {
     const { data: subscriptions } = await query
 
     if (!subscriptions || subscriptions.length === 0) {
-      return NextResponse.json({ 
-        access: false, 
-        reason: 'No active subscription found' 
-      })
+      return NextResponse.json(
+        { access: false, reason: 'No active subscription found', error: 'No active subscription found' },
+        { status: 404 }
+      )
     }
 
     const now = Math.floor(Date.now() / 1000)
@@ -50,10 +53,10 @@ export async function POST(req: NextRequest) {
     )
 
     if (!activeSubscription) {
-      return NextResponse.json({ 
-        access: false, 
-        reason: 'Subscription expired' 
-      })
+      return NextResponse.json(
+        { access: false, reason: 'Subscription expired', error: 'Subscription expired' },
+        { status: 403 }
+      )
     }
 
     return NextResponse.json({
